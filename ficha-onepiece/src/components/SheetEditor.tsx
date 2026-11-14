@@ -167,6 +167,7 @@ export function SheetEditor({ data, update, sheetId, ownerId, roller }: Props) {
         namePlaceholder="Nome da fruta (???)"
         descPlaceholder="Tipo, poderes, fraquezas…"
         emptyText="Nenhuma fruta. Use “+ Fruta” (é possível ter mais de uma)."
+        photos={{ ownerId, sheetId }}
       />
 
       <EntryList
@@ -187,6 +188,7 @@ export function SheetEditor({ data, update, sheetId, ownerId, roller }: Props) {
         namePlaceholder="Nome do acessório"
         descPlaceholder="Efeitos, bônus, história…"
         emptyText="Nenhum acessório."
+        photos={{ ownerId, sheetId }}
       />
 
       {/* ---------- cor (só Outros) ---------- */}

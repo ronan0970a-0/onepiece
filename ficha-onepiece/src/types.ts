@@ -4,6 +4,8 @@ export interface Entry {
   id: string
   name: string
   description: string
+  /** Foto opcional (usada em frutas e acessórios). */
+  photoUrl?: string
 }
 
 export interface Resource {

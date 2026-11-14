@@ -83,7 +83,13 @@ function entries(v: unknown): Entry[] {
   if (!Array.isArray(v)) return []
   return v.slice(0, 100).map((e) => {
     const o = isObj(e) ? e : {}
-    return { id: str(o.id, '', 64) || newId(), name: str(o.name, '', 120), description: str(o.description, '', 4000) }
+    const photoUrl = photoLink(o.photoUrl)
+    return {
+      id: str(o.id, '', 64) || newId(),
+      name: str(o.name, '', 120),
+      description: str(o.description, '', 4000),
+      ...(photoUrl ? { photoUrl } : {}),
+    }
   })
 }
 

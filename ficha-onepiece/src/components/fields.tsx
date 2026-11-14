@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { clamp, newId } from '../lib/sheet'
 import type { Entry, Resource } from '../types'
+import { EntryPhoto } from './EntryPhoto'
 
 // ---------- texto ----------
 
@@ -176,9 +177,11 @@ interface EntryListProps {
   namePlaceholder: string
   descPlaceholder: string
   emptyText: string
+  /** Se informado, cada item ganha um campo de foto (enviada para a pasta do dono da ficha). */
+  photos?: { ownerId: string; sheetId: string }
 }
 
-export function EntryList({ title, items, onChange, addLabel, namePlaceholder, descPlaceholder, emptyText }: EntryListProps) {
+export function EntryList({ title, items, onChange, addLabel, namePlaceholder, descPlaceholder, emptyText, photos }: EntryListProps) {
   const patch = (id: string, p: Partial<Entry>) => onChange(items.map((e) => (e.id === id ? { ...e, ...p } : e)))
   return (
     <section className="card">
@@ -191,31 +194,42 @@ export function EntryList({ title, items, onChange, addLabel, namePlaceholder, d
       {items.length === 0 && <p className="muted">{emptyText}</p>}
       <div className="entries">
         {items.map((e) => (
-          <div key={e.id} className="entry">
-            <div className="entry-row">
-              <input
-                className="entry-name"
-                value={e.name}
-                placeholder={namePlaceholder}
-                maxLength={120}
-                onChange={(ev) => patch(e.id, { name: ev.target.value })}
+          <div key={e.id} className={`entry${photos ? ' with-photo' : ''}`}>
+            {photos && (
+              <EntryPhoto
+                url={e.photoUrl ?? ''}
+                label={e.name || 'item'}
+                ownerId={photos.ownerId}
+                sheetId={photos.sheetId}
+                onChange={(u) => patch(e.id, { photoUrl: u })}
               />
-              <button
-                type="button"
-                className="btn small danger"
-                aria-label={`Remover ${e.name || 'item'}`}
-                onClick={() => onChange(items.filter((x) => x.id !== e.id))}
-              >
-                ✕
-              </button>
+            )}
+            <div className="entry-fields">
+              <div className="entry-row">
+                <input
+                  className="entry-name"
+                  value={e.name}
+                  placeholder={namePlaceholder}
+                  maxLength={120}
+                  onChange={(ev) => patch(e.id, { name: ev.target.value })}
+                />
+                <button
+                  type="button"
+                  className="btn small danger"
+                  aria-label={`Remover ${e.name || 'item'}`}
+                  onClick={() => onChange(items.filter((x) => x.id !== e.id))}
+                >
+                  ✕
+                </button>
+              </div>
+              <textarea
+                rows={photos ? 3 : 2}
+                value={e.description}
+                placeholder={descPlaceholder}
+                maxLength={4000}
+                onChange={(ev) => patch(e.id, { description: ev.target.value })}
+              />
             </div>
-            <textarea
-              rows={2}
-              value={e.description}
-              placeholder={descPlaceholder}
-              maxLength={4000}
-              onChange={(ev) => patch(e.id, { description: ev.target.value })}
-            />
           </div>
         ))}
       </div>

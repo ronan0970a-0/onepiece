@@ -753,6 +753,63 @@ input[type='color'] {
   border: 1px solid var(--border);
   border-radius: 12px;
 }
+.entry.with-photo {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 12px;
+}
+.entry-fields {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.entry-photo {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  width: 96px;
+}
+.entry-thumb {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  background: var(--panel) center / cover no-repeat;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.entry-thumb[style] {
+  border-style: solid;
+}
+.entry-thumb:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.entry-thumb-remove {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 2px;
+}
+.entry-photo-error {
+  font-size: 0.75rem;
+  text-align: center;
+}
+@media (max-width: 460px) {
+  .entry-photo,
+  .entry-thumb {
+    width: 72px;
+  }
+  .entry-thumb {
+    height: 72px;
+  }
+}
 .entry-row {
   display: flex;
   gap: 8px;

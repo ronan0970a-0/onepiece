@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { resizeImage } from '../lib/sheet'
+import { uploadPhoto } from '../lib/photos'
 
 interface Props {
   url: string
@@ -18,18 +17,9 @@ export function PhotoField({ url, ownerId, sheetId, onChange }: Props) {
   async function pick(file: File | undefined) {
     if (!file) return
     setError(null)
-    if (!file.type.startsWith('image/')) return setError('Escolha um arquivo de imagem.')
-    if (file.size > 15 * 1024 * 1024) return setError('Imagem muito grande (máx. 15 MB).')
     setBusy(true)
     try {
-      const blob = await resizeImage(file)
-      const path = `${ownerId}/${sheetId}-${Date.now()}.jpg`
-      const { error: upErr } = await supabase.storage
-        .from('character-photos')
-        .upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' })
-      if (upErr) throw new Error(upErr.message)
-      const { data } = supabase.storage.from('character-photos').getPublicUrl(path)
-      onChange(data.publicUrl)
+      onChange(await uploadPhoto(file, ownerId, sheetId))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Falha ao enviar a foto.')
     } finally {
