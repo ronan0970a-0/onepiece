@@ -1,4 +1,5 @@
-import { formatBerry } from '../lib/sheet'
+import { useState } from 'react'
+import { downloadPoster, posterText } from '../lib/poster'
 
 interface Props {
   name: string
@@ -8,32 +9,48 @@ interface Props {
 
 /**
  * Cartaz de recompensa. A imagem /assets/poster.png tem a "janela" da foto transparente,
- * então a foto do personagem fica ATRÁS do cartaz. Nome e valor são texto por cima.
+ * então a foto do personagem fica ATRÁS do cartaz (inteira, sobre fundo preto). Nome e valor são texto por cima.
  */
 export function WantedPoster({ name, bounty, photoUrl }: Props) {
-  const shownName = (name || 'Seu Nome').toUpperCase()
-  const amount = formatBerry(bounty)
-  // diminui a fonte para nomes/valores longos caberem no cartaz (unidades cqw = % da largura do cartaz)
-  const nameSize = Math.max(3.2, Math.min(7.4, 97 / Math.max(shownName.length, 8)))
-  const amountSize = Math.max(3.4, Math.min(8, 68 / (Math.max(amount.length, 4) * 0.78)))
+  const { shownName, amount, nameSize, amountSize } = posterText(name, bounty)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function download() {
+    setBusy(true)
+    setError(null)
+    try {
+      await downloadPoster(name, bounty, photoUrl)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Falha ao baixar o cartaz.')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
-    <div className="poster" aria-label={`Cartaz de recompensa de ${name || 'pirata'}`}>
-      <div
-        className="poster-photo"
-        style={photoUrl ? { backgroundImage: `url("${photoUrl}")` } : undefined}
-        role="img"
-        aria-label="Foto do personagem"
-      >
-        {!photoUrl && <span>?</span>}
+    <div className="poster-wrap">
+      <div className="poster" aria-label={`Cartaz de recompensa de ${name || 'pirata'}`}>
+        <div
+          className="poster-photo"
+          style={photoUrl ? { backgroundImage: `url("${photoUrl}")` } : undefined}
+          role="img"
+          aria-label="Foto do personagem"
+        >
+          {!photoUrl && <span>?</span>}
+        </div>
+        <img className="poster-bg" src="/assets/poster.png" alt="" draggable={false} />
+        <div className="poster-name" style={{ fontSize: `${nameSize}cqw` }}>
+          {shownName}
+        </div>
+        <div className="poster-bounty" style={{ fontSize: `${amountSize}cqw` }}>
+          {amount}
+        </div>
       </div>
-      <img className="poster-bg" src="/assets/poster.png" alt="" draggable={false} />
-      <div className="poster-name" style={{ fontSize: `${nameSize}cqw` }}>
-        {shownName}
-      </div>
-      <div className="poster-bounty" style={{ fontSize: `${amountSize}cqw` }}>
-        {amount}
-      </div>
+      <button type="button" className="btn poster-download" disabled={busy} onClick={() => void download()}>
+        {busy ? 'Gerando…' : '⬇ Baixar cartaz (PNG)'}
+      </button>
+      {error && <p className="error poster-error">{error}</p>}
     </div>
   )
 }

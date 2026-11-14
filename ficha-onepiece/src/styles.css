@@ -498,16 +498,30 @@ input[type='color'] {
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45));
   user-select: none;
 }
+.poster-wrap {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+.poster-wrap .poster {
+  margin: 0;
+}
+.poster-error {
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 0;
+}
 .poster-photo {
   position: absolute;
   left: 10.66%;
   top: 22.03%;
   width: 80.48%;
   height: 41.45%;
-  background: #2b1f13 center / cover no-repeat;
+  /* foto inteira (sem cortar); o que sobrar da janela fica preto */
+  background: #000 center / contain no-repeat;
   display: grid;
   place-items: center;
-  color: #7a6140;
+  color: #5a4a36;
   font-family: 'Cinzel', serif;
   font-size: 22cqw;
   font-weight: 900;

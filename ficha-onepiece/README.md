@@ -54,6 +54,7 @@ Na próxima vez que ela entrar, aparece o **Painel do Mestre**. Para remover: `d
 | **Cartaz de recompensa só para Pirata**; Marinha/Outros usam cartão de identificação | Seguindo seu pedido ("molde para piratas"). |
 | **Botão 🎲 nos status rola 1d20 + valor do status** | Ajuste a regra em `SheetEditor.tsx` (`rollStat`) se sua mesa usar outra fórmula. |
 | **Fotos no Supabase Storage** (bucket `character-photos`, leitura pública por link) | Reduzidas para ≤800px no navegador. O link é longo e difícil de adivinhar, mas quem tiver o link vê a foto. |
+| **Cartaz: foto inteira sobre fundo preto + botão "Baixar cartaz (PNG)"** | A foto não é mais cortada: o que sobrar da janela fica preto. Para voltar a preencher cortando, troque `contain` por `cover` em `.poster-photo` (`styles.css`) e use `Math.max` no lugar de `Math.min` em `src/lib/poster.ts`. O PNG sai em 1332×1988 e busca a foto do Supabase Storage (o link público já permite isso). |
 | **Foto em cada fruta e acessório** (Hakis ficam sem foto) | Miniatura quadrada em cada item; ≤600px, mesmo bucket e mesmas regras da foto do personagem. Para liberar em Hakis, passe `photos={{ ownerId, sheetId }}` ao `EntryList` de Hakis em `SheetEditor.tsx`. Fotos antigas não são apagadas do Storage ao trocar/remover (só o link some da ficha). |
 | **Imagens de One Piece** (barcos, logo Marine, cartaz) em `public/assets/` | São material protegido por direitos autorais; ok para a sua mesa, mas pense nisso se o site for público. O cartaz foi limpo: janela da foto transparente e valor fixo removido. |
 
