@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { normalizeSheet } from '../lib/sheet'
 import { supabase } from '../lib/supabase'
 import type { RollRow, SheetRow } from '../types'
 
@@ -50,6 +51,9 @@ export function useRolls() {
   return { rolls, loading, push }
 }
 
+/** Passa a ficha pela mesma limpeza usada ao abrir (ex.: link de foto inválido gravado por outro jogador é descartado). */
+const cleanRow = (r: SheetRow): SheetRow => ({ ...r, data: normalizeSheet(r.data) })
+
 /** Lista de todas as fichas (somente o mestre enxerga mais de uma). */
 export function useAllSheets() {
   const [sheets, setSheets] = useState<SheetRow[]>([])
@@ -63,7 +67,7 @@ export function useAllSheets() {
       .order('updated_at', { ascending: false })
       .then(({ data }) => {
         if (!active) return
-        setSheets((data as SheetRow[] | null) ?? [])
+        setSheets(((data as SheetRow[] | null) ?? []).map(cleanRow))
         setLoading(false)
       })
 
@@ -75,7 +79,7 @@ export function useAllSheets() {
           setSheets((prev) => prev.filter((s) => s.id !== id))
           return
         }
-        const row = payload.new as SheetRow
+        const row = cleanRow(payload.new as SheetRow)
         setSheets((prev) => {
           const rest = prev.filter((s) => s.id !== row.id)
           return [row, ...rest]

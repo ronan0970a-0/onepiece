@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { createDefaultSheet, normalizeSheet } from '../lib/sheet'
-import type { KlassId, SaveStatus, SheetData } from '../types'
+import type { KlassId, NpcKind, SaveStatus, SheetData } from '../types'
 
 /** Descobre (ou cria) a ficha do jogador logado. */
 export function useOwnSheetId(userId: string) {
@@ -49,13 +49,37 @@ export function useOwnSheetId(userId: string) {
   return { sheetId, loading, error, create }
 }
 
+/** Tabela que o documento ocupa: fichas dos jogadores ou NPCs/Bosses (mesmo formato de dados). */
+export type DocTable = 'sheets' | 'npcs'
+
+/** Campos extras que só os NPCs têm (ficam em colunas, fora do JSON da ficha). */
+export interface NpcMeta {
+  kind: NpcKind
+  revealed: boolean
+  byMaster: boolean
+}
+
+interface LoadedRow {
+  owner: string
+  data: unknown
+  kind?: NpcKind
+  revealed?: boolean
+  by_master?: boolean
+}
+
 /**
- * Carrega uma ficha, salva sozinha (debounce) e acompanha edições feitas por outra
+ * Carrega uma ficha (ou NPC), salva sozinha (debounce) e acompanha edições feitas por outra
  * pessoa (ex.: o mestre mexendo no HP) em tempo real.
  */
-export function useSheetDoc(sheetId: string, userId: string) {
+export function useSheetDoc(sheetId: string, userId: string, table: DocTable = 'sheets') {
   const [data, setDataState] = useState<SheetData | null>(null)
   const [owner, setOwner] = useState<string>('')
+  const [meta, setMetaState] = useState<NpcMeta | null>(null)
+  const metaRef = useRef<NpcMeta | null>(null)
+  const applyMeta = useCallback((m: NpcMeta | null) => {
+    metaRef.current = m
+    setMetaState(m)
+  }, [])
   const [status, setStatus] = useState<SaveStatus>('idle')
   const [error, setError] = useState<string | null>(null)
 
@@ -73,7 +97,7 @@ export function useSheetDoc(sheetId: string, userId: string) {
     dirty.current = false
     setStatus('saving')
     const { error: err } = await supabase
-      .from('sheets')
+      .from(table)
       .update({ data: d, name: d.name, klass: d.klass, bounty: d.bounty })
       .eq('id', sheetId)
     if (err) {
@@ -84,41 +108,50 @@ export function useSheetDoc(sheetId: string, userId: string) {
       setError(null)
       setStatus(dirty.current ? 'saving' : 'saved')
     }
-  }, [sheetId])
+  }, [sheetId, table])
 
   // carga inicial
   useEffect(() => {
     let active = true
+    const columns: string = table === 'npcs' ? 'owner, data, kind, revealed, by_master' : 'owner, data'
     supabase
-      .from('sheets')
-      .select('owner, data')
+      .from(table)
+      .select(columns)
       .eq('id', sheetId)
       .single()
-      .then(({ data: row, error: err }) => {
+      .then(({ data: found, error: err }) => {
         if (!active) return
+        const row = found as unknown as LoadedRow | null
         if (err || !row) {
-          setError(err?.message ?? 'Ficha não encontrada.')
+          setError(err?.message ?? (table === 'npcs' ? 'NPC não encontrado.' : 'Ficha não encontrada.'))
           return
         }
         const d = normalizeSheet(row.data)
         latest.current = d
         setOwner(row.owner)
+        if (table === 'npcs') {
+          applyMeta({ kind: row.kind === 'boss' ? 'boss' : 'npc', revealed: !!row.revealed, byMaster: !!row.by_master })
+        }
         setDataState(d)
       })
     return () => {
       active = false
     }
-  }, [sheetId])
+  }, [sheetId, table, applyMeta])
 
   // tempo real: edição de outra pessoa (mestre) aparece na hora
   useEffect(() => {
     const channel = supabase
-      .channel(`sheet:${sheetId}:${Math.random().toString(36).slice(2)}`)
+      .channel(`${table}:${sheetId}:${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'sheets', filter: `id=eq.${sheetId}` },
+        { event: 'UPDATE', schema: 'public', table, filter: `id=eq.${sheetId}` },
         (payload) => {
-          const row = payload.new as { data: unknown; updated_by: string | null }
+          const row = payload.new as { data: unknown; updated_by: string | null; kind?: NpcKind; revealed?: boolean }
+          if (table === 'npcs') {
+            const m = metaRef.current
+            if (m) applyMeta({ ...m, kind: row.kind === 'boss' ? 'boss' : 'npc', revealed: !!row.revealed })
+          }
           if (row.updated_by === userId || dirty.current) return
           const d = normalizeSheet(row.data)
           latest.current = d
@@ -129,7 +162,7 @@ export function useSheetDoc(sheetId: string, userId: string) {
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [sheetId, userId])
+  }, [sheetId, userId, table, applyMeta])
 
   // salva o que estiver pendente ao sair da tela / fechar a aba
   useEffect(() => {
@@ -158,5 +191,23 @@ export function useSheetDoc(sheetId: string, userId: string) {
     [flush],
   )
 
-  return { data, owner, status, error, update, flush }
+  /** Tipo (NPC/Boss) e "revelado": salvos na hora (não passam pelo debounce). O banco só aceita do mestre. */
+  const setNpcMeta = useCallback(
+    async (patch: Partial<Pick<NpcMeta, 'kind' | 'revealed'>>) => {
+      if (table !== 'npcs') return
+      const before = metaRef.current
+      if (!before) return
+      applyMeta({ ...before, ...patch })
+      const { error: err } = await supabase.from('npcs').update(patch).eq('id', sheetId)
+      if (err) {
+        applyMeta(before)
+        setError(err.message)
+      } else {
+        setError(null)
+      }
+    },
+    [sheetId, table, applyMeta],
+  )
+
+  return { data, owner, meta, status, error, update, flush, setNpcMeta }
 }

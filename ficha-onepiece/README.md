@@ -4,14 +4,17 @@ React + TypeScript (Vite) · Supabase (login, banco, tempo real, fotos) · Verce
 
 - **Jogador:** cria a ficha escolhendo **Pirata / Marinha / Outros**, edita tudo (salva sozinho), rola dados, importa/exporta JSON.
 - **Pirata:** cartaz *WANTED* com foto, nome e recompensa ao lado da ficha.
-- **Marinha:** logo Marine no header + cartão de identificação.
+- **Marinha:** logo Marine no header + cartão de identificação + aba **Procurados** (cartazes de todos os piratas, com nível de perigo).
+- **NPCs:** todo jogador tem uma aba **NPCs** (cria NPCs com ficha completa); o mestre tem uma seção própria **NPCs e Bosses**, separada dos jogadores.
 - **Outros:** tema preto/branco com **cor de destaque** e modo claro/escuro à escolha.
 - **Mestre:** vê e edita todas as fichas, e tem o **histórico geral de dados** em tempo real.
 
 ## 1. Supabase
 
 1. Crie um projeto em <https://supabase.com>.
-2. **SQL Editor → New query** → cole o conteúdo de `supabase/schema.sql` → **Run**.
+2. **SQL Editor → New query** → cole o conteúdo de `supabase/schema.sql` → **Run**. Depois faça o mesmo com `supabase/02-npcs-e-procurados.sql` (NPCs, Bosses e quadro de Procurados).
+   - Já tinha rodado o `schema.sql` antes? Rode **só o `02-…`**. Os dois são seguros de rodar de novo.
+   - Sem o `02-…`, o resto do app funciona normalmente; as abas **NPCs** e **Procurados** mostram um aviso pedindo para rodá-lo.
 3. **Authentication → Providers → Email:** deixe **"Confirm email" LIGADO** (a segurança do mestre depende disso, veja "Decisões").
 4. **Project Settings → API:** copie a *Project URL* e a chave *anon / publishable*.
 
@@ -42,6 +45,24 @@ Na próxima vez que ela entrar, aparece o **Painel do Mestre**. Para remover: `d
 
 > Se essa conta já tinha criado uma ficha de jogador, ela continua no banco (o mestre só deixa de vê-la como jogador).
 
+## NPCs, Bosses e Procurados
+
+**Quem vê o quê**
+
+| | Jogador | Marinha | Mestre |
+|---|---|---|---|
+| Ficha completa dos **próprios** NPCs | sim | sim | sim |
+| Ficha completa dos NPCs **de outros** | não | não | **sim (todos)** |
+| Criar **Boss** e **revelar** NPC aos jogadores | não | não | **sim** |
+| NPC revelado | só identidade (foto, nome, raça, patente, recompensa) | idem | tudo |
+| Quadro de **Procurados** | não | **sim** | sim |
+
+- **Revelar** é um botão na ficha do NPC (só o mestre vê). Um NPC revelado nunca expõe HP, status nem itens.
+- **Procurados** lista todos os piratas jogadores + NPCs piratas revelados, do mais ao menos perigoso. O perigo vem só da recompensa: *Baixo* (até 29.999.999), *Perigoso* (30 mi), *Muito perigoso* (300 mi), *Ameaça extrema* (1 bi) e *Sem recompensa*. Para mudar os limites, edite `DANGER_LIMITS` em `src/lib/danger.ts`.
+- O quadro só devolve **nome, foto, patente e recompensa**: a ficha completa do pirata continua privada. Quem troca a ficha para Marinha passa a ver o quadro (a classe é livre para trocar, como você pediu).
+- Cada jogador pode ter até **50 NPCs** (limite no banco; mude em `npcs_guard`, no `02-…sql`).
+- Rolar dados na ficha de um NPC entra no histórico com o nome dele ("Guarda Bob: Teste de Força"). Para o jogador, aparece como rolagem do personagem dele; para o mestre, como rolagem "Mestre".
+
 ## Decisões de projeto (leia!)
 
 | Decisão | Por quê / como mudar |
@@ -62,10 +83,13 @@ Na próxima vez que ela entrar, aparece o **Painel do Mestre**. Para remover: `d
 
 ```
 supabase/schema.sql         tabelas, RLS, função de dados, realtime, bucket de fotos
+supabase/02-npcs-e-procurados.sql   tabela de NPCs, permissões, quadro de Procurados
 src/lib/sheet.ts            modelo da ficha, valores padrão, import/export JSON
 src/lib/dice.ts             chamada da rolagem (RPC)
 src/hooks/                  login, ficha com autosave + tempo real, histórico de dados
 src/components/             Header, WantedPoster, IdCard, SheetEditor, DicePanel, MasterPanel…
+                            WantedBoard (Procurados), NpcTab / MasterNpcsTab / NpcView (NPCs)
+src/lib/danger.ts           níveis de perigo por recompensa
 src/styles.css              temas por classe e layout responsivo (PC, tablet, celular)
 public/assets/              barcos, logo Marine e molde do cartaz
 ```

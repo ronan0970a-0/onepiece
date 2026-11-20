@@ -68,6 +68,46 @@ export interface SheetRow {
   updated_by: string | null
 }
 
+export type NpcKind = 'npc' | 'boss'
+
+/** NPC / Boss: mesmo formato de dados da ficha, mais o tipo e se foi revelado aos jogadores. */
+export interface NpcRow {
+  id: string
+  owner: string
+  by_master: boolean
+  kind: NpcKind
+  revealed: boolean
+  name: string
+  klass: KlassId
+  bounty: number
+  data: SheetData
+  updated_at: string
+  updated_by: string | null
+}
+
+/** NPC revelado pelo mestre: só a identidade (nunca HP, status ou itens). */
+export interface RevealedNpc {
+  id: string
+  kind: NpcKind
+  name: string
+  klass: KlassId
+  bounty: number
+  photo_url: string
+  rank: string
+  race: string
+}
+
+/** Linha do quadro de Procurados da Marinha (piratas jogadores + NPCs piratas revelados). */
+export interface WantedEntry {
+  source: 'player' | 'npc'
+  id: string
+  name: string
+  bounty: number
+  photo_url: string
+  rank: string
+  kind: '' | NpcKind
+}
+
 export interface RollRow {
   id: number
   sheet_id: string | null

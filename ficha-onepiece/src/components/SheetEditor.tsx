@@ -19,11 +19,13 @@ interface Props {
   sheetId: string
   ownerId: string
   roller: Roller | null
+  /** Rótulo do seletor de classe (NPCs usam "Facção"). */
+  klassLabel?: string
 }
 
 const SWATCHES = ['#f2f2f2', '#e6b04b', '#d64545', '#3aa0ff', '#4cc38a', '#b07cff', '#ff8fb8']
 
-export function SheetEditor({ data, update, sheetId, ownerId, roller }: Props) {
+export function SheetEditor({ data, update, sheetId, ownerId, roller, klassLabel = 'Classe' }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
 
@@ -71,8 +73,8 @@ export function SheetEditor({ data, update, sheetId, ownerId, roller }: Props) {
 
         <PhotoField url={data.photoUrl} ownerId={ownerId} sheetId={sheetId} onChange={(u) => set('photoUrl', u)} />
 
-        <div className="klass-switch" role="group" aria-label="Classe">
-          <span className="klass-switch-label">Classe</span>
+        <div className="klass-switch" role="group" aria-label={klassLabel}>
+          <span className="klass-switch-label">{klassLabel}</span>
           {KLASSES.map((k) => (
             <button
               key={k.id}

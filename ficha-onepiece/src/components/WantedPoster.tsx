@@ -5,13 +5,15 @@ interface Props {
   name: string
   bounty: number
   photoUrl: string
+  /** Versão para a galeria: botão de download menor. */
+  compact?: boolean
 }
 
 /**
  * Cartaz de recompensa. A imagem /assets/poster.png tem a "janela" da foto transparente,
  * então a foto do personagem fica ATRÁS do cartaz (inteira, sobre fundo preto). Nome e valor são texto por cima.
  */
-export function WantedPoster({ name, bounty, photoUrl }: Props) {
+export function WantedPoster({ name, bounty, photoUrl, compact }: Props) {
   const { shownName, amount, nameSize, amountSize } = posterText(name, bounty)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -47,8 +49,8 @@ export function WantedPoster({ name, bounty, photoUrl }: Props) {
           {amount}
         </div>
       </div>
-      <button type="button" className="btn poster-download" disabled={busy} onClick={() => void download()}>
-        {busy ? 'Gerando…' : '⬇ Baixar cartaz (PNG)'}
+      <button type="button" className={`btn poster-download${compact ? ' small' : ''}`} disabled={busy} onClick={() => void download()}>
+        {busy ? 'Gerando…' : compact ? '⬇ Baixar PNG' : '⬇ Baixar cartaz (PNG)'}
       </button>
       {error && <p className="error poster-error">{error}</p>}
     </div>

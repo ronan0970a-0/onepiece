@@ -8,6 +8,8 @@ interface Props {
   email?: string
   status?: SaveStatus
   onBack?: () => void
+  /** Texto do botão de voltar (padrão: "← Fichas"). */
+  backLabel?: string
   onSignOut?: () => void
   children?: ReactNode
 }
@@ -25,14 +27,14 @@ const STATUS_TEXT: Record<SaveStatus, string> = {
   error: 'Erro ao salvar',
 }
 
-export function Header({ klass, title, subtitle, email, status = 'idle', onBack, onSignOut, children }: Props) {
+export function Header({ klass, title, subtitle, email, status = 'idle', onBack, backLabel = '← Fichas', onSignOut, children }: Props) {
   return (
     <header className={`hdr hdr-${klass}`}>
       <div className="hdr-inner">
         <div className="hdr-brand">
           {onBack && (
             <button type="button" className="btn ghost" onClick={onBack}>
-              ← Fichas
+              {backLabel}
             </button>
           )}
           {klass === 'marinha' && <img className="hdr-logo" src="/assets/marine-logo.png" alt="Marine" />}

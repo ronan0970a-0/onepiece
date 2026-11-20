@@ -57,6 +57,11 @@ export function createDefaultSheet(klass: KlassId): SheetData {
   }
 }
 
+/** NPC novo: mesma estrutura da ficha, facção "Outros" e sem fruta pré-preenchida. */
+export function createDefaultNpc(): SheetData {
+  return { ...createDefaultSheet('outros'), fruits: [] }
+}
+
 // ---------- normalização (usada ao carregar do banco e ao importar JSON) ----------
 
 type Obj = Record<string, unknown>
@@ -94,7 +99,7 @@ function entries(v: unknown): Entry[] {
 }
 
 /** Só aceita links https sem aspas/parênteses (a URL vai para um `background-image`, e o JSON importado não é confiável). */
-function photoLink(v: unknown): string {
+export function photoLink(v: unknown): string {
   return typeof v === 'string' && v.length <= 1000 && /^https:\/\/[^\s"'()\\]+$/.test(v) ? v : ''
 }
 

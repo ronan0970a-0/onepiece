@@ -1131,6 +1131,190 @@ input[type='color'] {
   }
 }
 
+/* ---------- NPCs e quadro de procurados ---------- */
+
+.section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.section-head h2 {
+  margin: 0 0 2px;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+}
+.npc-section {
+  margin-bottom: 32px;
+}
+.npc-section-players {
+  padding-top: 20px;
+  border-top: 1px dashed var(--border);
+}
+.master-tools {
+  flex-wrap: wrap;
+}
+.master-tools .field.inline select {
+  width: auto;
+  min-width: 170px;
+}
+.badge-npc {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.badge-boss {
+  background: #b3261e;
+  color: #fff;
+}
+.mcard.static {
+  cursor: default;
+}
+.mcard.static:hover {
+  transform: none;
+  border-color: var(--border);
+}
+.mcard-foot {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+}
+.tag-on {
+  color: var(--ok);
+  font-weight: 600;
+}
+.tag-off {
+  color: var(--muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 0.85rem;
+  touch-action: manipulation;
+}
+.chip b {
+  margin-left: 4px;
+  opacity: 0.8;
+}
+.chip.on {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+.chip-none {
+  box-shadow: inset 3px 0 0 #7a7a7a;
+}
+.chip-low {
+  box-shadow: inset 3px 0 0 #2e9e4f;
+}
+.chip-high {
+  box-shadow: inset 3px 0 0 #e08a2e;
+}
+.chip-severe {
+  box-shadow: inset 3px 0 0 #d33030;
+}
+.chip-extreme {
+  box-shadow: inset 3px 0 0 #a63bd1;
+}
+.board-legend {
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 26px 20px;
+}
+.board-card {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  align-content: start;
+}
+.board-card .poster-wrap {
+  width: 100%;
+}
+.board-meta {
+  margin: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.danger-tag {
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.danger-none {
+  background: #5f5f5f;
+}
+.danger-low {
+  background: #2e8b4c;
+}
+.danger-high {
+  background: #e08a2e;
+  color: #1b1206;
+}
+.danger-severe {
+  background: #c62828;
+}
+.danger-extreme {
+  background: #7b1fa2;
+  box-shadow: 0 0 14px rgba(171, 71, 214, 0.65);
+}
+
+.switch {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin: 4px 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  cursor: pointer;
+}
+.switch input[type='checkbox'] {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+.switch b {
+  display: block;
+}
+.switch small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+.npc-controls .btn.danger {
+  width: 100%;
+}
+
 /* ---------- login / escolha de classe / avisos ---------- */
 
 .splash {

@@ -3,8 +3,11 @@ import { useAllSheets } from '../hooks/useRolls'
 import { useRoller } from '../hooks/useRoller'
 import { formatBerry } from '../lib/sheet'
 import type { SheetRow } from '../types'
+import { KLASS_LABEL, Mini } from './cards'
 import { DicePanel } from './DicePanel'
 import { Header } from './Header'
+import { MasterNpcsTab } from './MasterNpcsTab'
+import { NpcView } from './NpcView'
 import { RollHistory } from './RollHistory'
 import { SheetView } from './SheetView'
 
@@ -14,11 +17,25 @@ interface Props {
   onSignOut: () => void
 }
 
-const KLASS_LABEL = { pirata: 'Pirata', marinha: 'Marinha', outros: 'Outros' } as const
-
 export function MasterPanel({ userId, email, onSignOut }: Props) {
-  const [tab, setTab] = useState<'sheets' | 'history'>('sheets')
+  const [tab, setTab] = useState<'sheets' | 'npcs' | 'history'>('sheets')
   const [openId, setOpenId] = useState<string | null>(null)
+  const [openNpc, setOpenNpc] = useState<string | null>(null)
+
+  if (openNpc) {
+    return (
+      <NpcView
+        key={openNpc}
+        npcId={openNpc}
+        userId={userId}
+        email={email}
+        rollSheetId={null}
+        isMaster
+        onBack={() => setOpenNpc(null)}
+        onSignOut={onSignOut}
+      />
+    )
+  }
 
   if (openId) {
     return (
@@ -36,16 +53,21 @@ export function MasterPanel({ userId, email, onSignOut }: Props) {
 
   return (
     <div className="app" data-theme="pirata" data-mode="dark">
-      <Header klass="pirata" title="Painel do Mestre" subtitle="Fichas e dados da mesa" email={email} onSignOut={onSignOut} />
+      <Header klass="pirata" title="Painel do Mestre" subtitle="Fichas, NPCs e dados da mesa" email={email} onSignOut={onSignOut} />
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === 'sheets'} className={`tab${tab === 'sheets' ? ' on' : ''}`} onClick={() => setTab('sheets')}>
           Fichas
+        </button>
+        <button role="tab" aria-selected={tab === 'npcs'} className={`tab${tab === 'npcs' ? ' on' : ''}`} onClick={() => setTab('npcs')}>
+          NPCs e Bosses
         </button>
         <button role="tab" aria-selected={tab === 'history'} className={`tab${tab === 'history' ? ' on' : ''}`} onClick={() => setTab('history')}>
           Histórico de dados
         </button>
       </div>
-      {tab === 'sheets' ? <SheetsTab onOpen={setOpenId} /> : <HistoryTab />}
+      {tab === 'sheets' && <SheetsTab onOpen={setOpenId} />}
+      {tab === 'npcs' && <MasterNpcsTab userId={userId} onOpen={setOpenNpc} />}
+      {tab === 'history' && <HistoryTab />}
     </div>
   )
 }
@@ -75,20 +97,6 @@ function SheetsTab({ onOpen }: { onOpen: (id: string) => void }) {
         ))}
       </div>
     </main>
-  )
-}
-
-function Mini({ label, cur, max, kind }: { label: string; cur: number; max: number; kind: string }) {
-  const pct = max > 0 ? Math.min(100, Math.max(0, (cur / max) * 100)) : 0
-  return (
-    <div className={`mini res-${kind}`}>
-      <span>
-        {label} {cur}/{max}
-      </span>
-      <div className="res-track">
-        <div className="res-fill" style={{ width: `${pct}%` }} />
-      </div>
-    </div>
   )
 }
 
