@@ -7,7 +7,8 @@ React + TypeScript (Vite) · Supabase (login, banco, tempo real, fotos) · Verce
 - **Marinha:** logo Marine no header + cartão de identificação + aba **Procurados** (cartazes de todos os piratas, com nível de perigo).
 - **NPCs:** todo jogador tem uma aba **NPCs** (cria NPCs com ficha completa); o mestre tem uma seção própria **NPCs e Bosses**, separada dos jogadores.
 - **Outros:** tema preto/branco com **cor de destaque** e modo claro/escuro à escolha.
-- **Mestre:** vê e edita todas as fichas, e tem o **histórico geral de dados** em tempo real.
+- **Mestre:** vê e edita todas as fichas, tem o **histórico geral de dados** em tempo real e o quadro de **Procurados**. O botão **Minha ficha** (no painel) abre a ficha pessoal do mestre, com as mesmas abas dos jogadores (Ficha / Procurados / NPCs); o botão **← Painel do Mestre** volta ao painel.
+- **Temas translúcidos:** Pirata e Marinha mostram o barco (`public/assets/pirate-ship.jpg` / `marine-ship.jpg`) como fundo fixo, com painéis em “vidro fosco”.
 
 ## 1. Supabase
 
@@ -55,7 +56,8 @@ Na próxima vez que ela entrar, aparece o **Painel do Mestre**. Para remover: `d
 | Ficha completa dos NPCs **de outros** | não | não | **sim (todos)** |
 | Criar **Boss** e **revelar** NPC aos jogadores | não | não | **sim** |
 | NPC revelado | só identidade (foto, nome, raça, patente, recompensa) | idem | tudo |
-| Quadro de **Procurados** | não | **sim** | sim |
+| Quadro de **Procurados** | não | **sim** | sim (no painel e na própria ficha) |
+| Ficha pessoal própria (jogar) | sim | sim | **sim (“Minha ficha”)** |
 
 - **Revelar** é um botão na ficha do NPC (só o mestre vê). Um NPC revelado nunca expõe HP, status nem itens.
 - **Procurados** lista todos os piratas jogadores + NPCs piratas revelados, do mais ao menos perigoso. O perigo vem só da recompensa: *Baixo* (até 29.999.999), *Perigoso* (30 mi), *Muito perigoso* (300 mi), *Ameaça extrema* (1 bi) e *Sem recompensa*. Para mudar os limites, edite `DANGER_LIMITS` em `src/lib/danger.ts`.
@@ -68,7 +70,7 @@ Na próxima vez que ela entrar, aparece o **Painel do Mestre**. Para remover: `d
 | Decisão | Por quê / como mudar |
 |---|---|
 | **Mestre definido por email na tabela `masters`**, só pelo SQL Editor | Nada no código fica com o email. Só vale com **email confirmado**, senão qualquer um criaria conta com o email do mestre. Não desligue "Confirm email". |
-| **Uma ficha por conta** | Simples e combina com o bot (1 email = 1 jogador). Para várias fichas por conta, remova `unique` de `sheets.owner` e adicione uma lista de personagens no app. |
+| **Uma ficha por conta** (vale também para o mestre: 1 ficha pessoal + NPCs/Bosses ilimitados até 50) | Simples e combina com o bot (1 email = 1 jogador). Outras “fichas” do mestre são NPCs/Bosses. Para várias fichas por conta, remova `unique` de `sheets.owner` e adicione uma lista de personagens no app. |
 | **Dados sorteados no servidor** (`roll_dice`) | O cliente não consegue inserir no histórico, então ninguém falsifica resultado. Jogador só rola na própria ficha. |
 | **Jogador vê só as próprias rolagens; mestre vê todas** | Para a mesa toda ver tudo, troque a policy `rolls_select` por `using (true)`. |
 | **Mestre pode editar qualquer ficha** (ex.: tirar HP); o jogador vê a mudança em tempo real | Para somente leitura, remova `or public.is_master()` da policy `sheets_update`. |
@@ -77,6 +79,7 @@ Na próxima vez que ela entrar, aparece o **Painel do Mestre**. Para remover: `d
 | **Fotos no Supabase Storage** (bucket `character-photos`, leitura pública por link) | Reduzidas para ≤800px no navegador. O link é longo e difícil de adivinhar, mas quem tiver o link vê a foto. |
 | **Cartaz: foto inteira sobre fundo preto + botão "Baixar cartaz (PNG)"** | A foto não é mais cortada: o que sobrar da janela fica preto. Para voltar a preencher cortando, troque `contain` por `cover` em `.poster-photo` (`styles.css`) e use `Math.max` no lugar de `Math.min` em `src/lib/poster.ts`. O PNG sai em 1332×1988 e busca a foto do Supabase Storage (o link público já permite isso). |
 | **Foto em cada fruta e acessório** (Hakis ficam sem foto) | Miniatura quadrada em cada item; ≤600px, mesmo bucket e mesmas regras da foto do personagem. Para liberar em Hakis, passe `photos={{ ownerId, sheetId }}` ao `EntryList` de Hakis em `SheetEditor.tsx`. Fotos antigas não são apagadas do Storage ao trocar/remover (só o link some da ficha). |
+| **Fundo translúcido nos temas Pirata/Marinha** | O barco fica fixo atrás de tudo (`.app::before` em `styles.css`); a transparência vem de `--panel`/`--panel-2` e o véu de `--veil`. Para ver mais o barco, reduza o alfa de `--panel` (ex.: `0.74` → `0.6`); para ler melhor, aumente. O tema “Outros” não muda. |
 | **Imagens de One Piece** (barcos, logo Marine, cartaz) em `public/assets/` | São material protegido por direitos autorais; ok para a sua mesa, mas pense nisso se o site for público. O cartaz foi limpo: janela da foto transparente e valor fixo removido. |
 
 ## Estrutura

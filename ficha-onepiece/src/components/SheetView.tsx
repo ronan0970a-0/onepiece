@@ -18,8 +18,12 @@ interface Props {
   email?: string
   /** true = o dono da ficha (pode rolar dados e usa as abas Procurados/NPCs). O mestre vendo a ficha de um jogador usa false. */
   canRoll: boolean
+  /** Mestre jogando com a própria ficha: vê o quadro de Procurados sempre e pode revelar/criar Boss nos NPCs. */
+  isMaster?: boolean
   onSignOut: () => void
   onBack?: () => void
+  /** Texto do botão de voltar (padrão: "← Fichas"). */
+  backLabel?: string
 }
 
 export type SheetTab = 'ficha' | 'procurados' | 'npcs'
@@ -43,7 +47,7 @@ export function SheetView(props: Props) {
         userId={props.userId}
         email={props.email}
         rollSheetId={props.sheetId}
-        isMaster={false}
+        isMaster={!!props.isMaster}
         onBack={() => setOpenNpc(null)}
         onSignOut={props.onSignOut}
       />
@@ -64,8 +68,10 @@ function SheetLayout({
   userId,
   email,
   canRoll,
+  isMaster = false,
   onSignOut,
   onBack,
+  backLabel,
   roller,
   tabs,
 }: Props & { roller: Roller | null; tabs: TabState }) {
@@ -81,12 +87,20 @@ function SheetLayout({
 
   const theme = appTheme(data)
   // abas só para o dono da ficha; "Procurados" só para quem é da Marinha (se trocar de classe, volta para a ficha)
-  const hasBoard = canRoll && data.klass === 'marinha'
+  const hasBoard = canRoll && (data.klass === 'marinha' || isMaster)
   const tab: SheetTab = tabs.tab === 'procurados' && !hasBoard ? 'ficha' : tabs.tab
 
   return (
     <div className="app" data-theme={data.klass} data-mode={theme.mode} style={theme.style}>
-      <Header klass={data.klass} email={email} status={status} onBack={onBack} onSignOut={onSignOut} />
+      <Header
+        klass={data.klass}
+        subtitle={isMaster ? 'Minha ficha de jogador' : undefined}
+        email={email}
+        status={status}
+        onBack={onBack}
+        backLabel={backLabel}
+        onSignOut={onSignOut}
+      />
 
       {error && <p className="banner-error">Não foi possível salvar: {error}</p>}
 

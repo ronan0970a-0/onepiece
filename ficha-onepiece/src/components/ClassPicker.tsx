@@ -7,6 +7,8 @@ interface Props {
   error: string | null
   onPick: (k: KlassId) => void
   onSignOut: () => void
+  /** Mestre: volta ao painel sem criar ficha. */
+  onBack?: () => void
 }
 
 const OPTIONS: { id: KlassId; title: string; text: string; image?: string }[] = [
@@ -15,7 +17,7 @@ const OPTIONS: { id: KlassId; title: string; text: string; image?: string }[] = 
   { id: 'outros', title: 'Outros', text: 'Nem pirata, nem marinheiro. Escolha a sua própria cor.' },
 ]
 
-export function ClassPicker({ email, busy, error, onPick, onSignOut }: Props) {
+export function ClassPicker({ email, busy, error, onPick, onSignOut, onBack }: Props) {
   const [selected, setSelected] = useState<KlassId | null>(null)
 
   return (
@@ -23,6 +25,11 @@ export function ClassPicker({ email, busy, error, onPick, onSignOut }: Props) {
       <header className="hdr hdr-outros">
         <div className="hdr-inner">
           <div className="hdr-brand">
+            {onBack && (
+              <button type="button" className="btn ghost" onClick={onBack}>
+                ← Painel do Mestre
+              </button>
+            )}
             <h1>Nova ficha</h1>
           </div>
           <div className="hdr-actions">

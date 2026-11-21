@@ -53,16 +53,18 @@ textarea {
   color: var(--text);
 }
 
+/* Pirata e Marinha: a imagem do barco fica fixa atrás de tudo e os painéis são translúcidos */
 .app[data-theme='pirata'] {
-  background:
-    radial-gradient(1200px 500px at 50% -10%, rgba(230, 176, 75, 0.12), transparent 70%),
-    var(--bg);
+  --panel: rgba(31, 25, 18, 0.74);
+  --panel-2: rgba(44, 36, 25, 0.66);
+  --ship: url('/assets/pirate-ship.jpg');
+  --veil: linear-gradient(180deg, rgba(14, 11, 8, 0.3), rgba(14, 11, 8, 0.5));
 }
 
 .app[data-theme='marinha'] {
   --bg: #eaf1f9;
-  --panel: #ffffff;
-  --panel-2: #f2f7fd;
+  --panel: rgba(255, 255, 255, 0.74);
+  --panel-2: rgba(242, 247, 253, 0.66);
   --text: #0e2745;
   --muted: #55708f;
   --border: #c5d6ea;
@@ -71,6 +73,44 @@ textarea {
   --on-accent: #ffffff;
   --danger: #c0392b;
   --font-title: 'Cinzel', serif;
+  --ship: url('/assets/marine-ship.jpg');
+  --veil: linear-gradient(180deg, rgba(234, 241, 249, 0.1), rgba(234, 241, 249, 0.22));
+}
+
+.app[data-theme='pirata'],
+.app[data-theme='marinha'] {
+  position: relative;
+  isolation: isolate;
+}
+.app[data-theme='pirata']::before,
+.app[data-theme='marinha']::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--veil), var(--ship) center / cover no-repeat;
+}
+/* vidro fosco: o barco aparece, mas o texto continua legível */
+.app[data-theme='pirata'] :is(.card, .mcard, .tab, .idcard, .chip, .auth-card, .pick),
+.app[data-theme='marinha'] :is(.card, .mcard, .tab, .idcard, .chip, .auth-card, .pick) {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* textos soltos (títulos de seção, legenda, busca) ganham um vidro próprio para não sumirem sobre o barco */
+.app[data-theme='pirata'] :is(.section-head, .board-legend, .master-tools, .master-main > .muted),
+.app[data-theme='marinha'] :is(.section-head, .board-legend, .master-tools, .master-main > .muted) {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.app[data-theme='pirata'] .board-legend,
+.app[data-theme='marinha'] .board-legend {
+  margin-bottom: 20px;
 }
 
 .app[data-theme='outros'] {
@@ -160,9 +200,9 @@ textarea {
   display: flex;
   align-items: flex-end;
   color: #fff;
-  background:
-    linear-gradient(180deg, rgba(10, 8, 5, 0.25) 0%, rgba(10, 8, 5, 0.82) 100%),
-    url('/assets/pirate-ship.jpg') center 38% / cover no-repeat;
+  background: linear-gradient(180deg, rgba(10, 8, 5, 0.15) 0%, rgba(10, 8, 5, 0.6) 100%);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
 }
 .hdr-pirata .hdr-inner {
   width: 100%;
@@ -173,9 +213,9 @@ textarea {
 }
 
 .hdr-marinha {
-  background:
-    linear-gradient(90deg, #ffffff 0%, #ffffff 38%, rgba(255, 255, 255, 0.55) 62%, rgba(255, 255, 255, 0.1) 100%),
-    url('/assets/marine-ship.jpg') right center / cover no-repeat;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.6) 55%, rgba(255, 255, 255, 0.2) 100%);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
   color: #0e2745;
   min-height: 120px;
   display: flex;
